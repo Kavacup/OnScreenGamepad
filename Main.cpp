@@ -9,12 +9,45 @@
 
 #define SIZE_KOEF 0.5
 
+bool check_axes = true;
+GLFWgamepadstate state;
+int windowWidth;
+int windowHeight;
+
 void drawAll(GLuint &gamepad_texture) {
 	drawTexturedRect(-1, -1, 2, 2, gamepad_texture); // full window
 	glPushMatrix();
-	glScalef(1.f / CONTROLLER_WIDTH, 1.f / CONTROLLER_HEIGHT, 1);
-	glColor3f(1, 0, 0);
-	drawCircle(0, 0, 100, 100);
+	glTranslatef(-1, 1, 0);
+	glScalef(2.f / CONTROLLER_WIDTH, - 2.f / CONTROLLER_HEIGHT, 1);
+	drawCircle(0, 0, 20, 10); // origin
+	if (glfwJoystickIsGamepad(GLFW_JOYSTICK_1)) {
+		if (glfwGetGamepadState(GLFW_JOYSTICK_1, &state)) {
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_A]) drawButtonPressed(BUTTON_A_X, BUTTON_A_Y, BUTTON_RADIUS);
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_B]) drawButtonPressed(BUTTON_B_X, BUTTON_B_Y, BUTTON_RADIUS);
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_X]) drawButtonPressed(BUTTON_X_X, BUTTON_X_Y, BUTTON_RADIUS);
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_Y]) drawButtonPressed(BUTTON_Y_X, BUTTON_Y_Y, BUTTON_RADIUS);
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER]) std::cout << "lb ";
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER]) std::cout << "rb ";
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_BACK]) std::cout << "back ";
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_START]) std::cout << "start ";
+			//if (state.buttons[GLFW_GAMEPAD_BUTTON_GUIDE]) std::cout << "guide "; // th?
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]) drawTopDPAD();
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT]) drawRightDPAD();
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]) drawBottomDPAD();
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]) drawLeftDPAD();
+			if (state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] && state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y])
+				drawLeftStick(state);
+			if (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X] && state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y])
+				drawRightStick(state);
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_THUMB]) drawLeftThumb();
+			if (state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_THUMB]) drawRightThumb();
+			
+			
+			//if (state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER]) std::cout << "ltr ";
+			//if (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER]) std::cout << "rtr ";
+
+		}
+	}
 	glPopMatrix();
 }
 
@@ -76,11 +109,10 @@ int main() {
 
 	);
 	// init framebuf
-	int width, height;
-	glfwGetFramebufferSize(window, &width, &height);
+	glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
 	glfwSetCursorPosCallback(window, cursor_position_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
-	glViewport(0, 0, width, height);
+	glViewport(0, 0, windowWidth, windowHeight);
 	glfwSwapInterval(1);
 
 	glClearColor(0, 0, 0, 0); // transparent window
@@ -89,9 +121,6 @@ int main() {
 	const char* name = glfwGetGamepadName(GLFW_JOYSTICK_1);
 	printf("%s", name); // XInput Gamepad (GLFW)
 #endif
-
-	bool check_axes = false;
-	GLFWgamepadstate state;
 
 	//main window loop
 	while (!glfwWindowShouldClose(window)) {
@@ -107,34 +136,6 @@ int main() {
 		glLoadIdentity();
 		drawAll(texture);
 		glfwPollEvents();
-		if (glfwJoystickIsGamepad(GLFW_JOYSTICK_1)) {
-			if (glfwGetGamepadState(GLFW_JOYSTICK_1, &state)) {
-				if (state.buttons[GLFW_GAMEPAD_BUTTON_A]) std::cout << "a ";
-				if (state.buttons[GLFW_GAMEPAD_BUTTON_B]) std::cout << "b ";
-				if (state.buttons[GLFW_GAMEPAD_BUTTON_X]) std::cout << "x ";
-				if (state.buttons[GLFW_GAMEPAD_BUTTON_Y]) std::cout << "y ";
-				if (state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER]) std::cout << "lb ";
-				if (state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER]) std::cout << "rb ";
-				if (state.buttons[GLFW_GAMEPAD_BUTTON_BACK]) std::cout << "back ";
-				if (state.buttons[GLFW_GAMEPAD_BUTTON_START]) std::cout << "start ";
-				//if (state.buttons[GLFW_GAMEPAD_BUTTON_GUIDE]) std::cout << "guide "; // th?
-				if (state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_THUMB]) std::cout << "lt ";
-				if (state.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_THUMB]) std::cout << "rt ";
-				if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]) std::cout << "dpu ";
-				if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT]) std::cout << "dpr ";
-				if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]) std::cout << "dpd ";
-				if (state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]) std::cout << "dpl ";
-				if (check_axes) {
-					if (state.axes[GLFW_GAMEPAD_AXIS_LEFT_X]) std::cout << "lx ";
-					if (state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y]) std::cout << "ly ";
-					if (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X]) std::cout << "rx ";
-					if (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y]) std::cout << "ry ";
-					if (state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER]) std::cout << "ltr ";
-					if (state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER]) std::cout << "rtr ";
-				}
-
-			}
-		}
 		glfwSwapBuffers(window);
 	}
 
