@@ -1,14 +1,13 @@
 #include "Drawing.h"
 #include <GLFW/glfw3.h>
-#define PS_PROFILE
 #include "Positioning constants.h"
 
 float GLOBAL_ALPHA = 0.5f;
 float GLOBAL_ALPHA_ELEMENTS = GLOBAL_ALPHA;
 float GLOBAL_BRIGHTNESS_ELEMENTS = GLOBAL_ALPHA;
-float BUTTON_COLOR[] = { 1 * GLOBAL_BRIGHTNESS_ELEMENTS, 0 * GLOBAL_BRIGHTNESS_ELEMENTS, 0 * GLOBAL_BRIGHTNESS_ELEMENTS };
+float BUTTON_COLOR[] = { 1 * GLOBAL_BRIGHTNESS_ELEMENTS, 0.32f * GLOBAL_BRIGHTNESS_ELEMENTS, 0.54f * GLOBAL_BRIGHTNESS_ELEMENTS };
 float STICK_COLOR[] = { 0 * GLOBAL_BRIGHTNESS_ELEMENTS, 1 * GLOBAL_BRIGHTNESS_ELEMENTS, 0 * GLOBAL_BRIGHTNESS_ELEMENTS };
-float THUMB_COLOR[] = { 1 * GLOBAL_BRIGHTNESS_ELEMENTS, 0 * GLOBAL_BRIGHTNESS_ELEMENTS, 0 * GLOBAL_BRIGHTNESS_ELEMENTS };
+float THUMB_COLOR[] = { 1 * GLOBAL_BRIGHTNESS_ELEMENTS, 0.32f * GLOBAL_BRIGHTNESS_ELEMENTS, 0.54f * GLOBAL_BRIGHTNESS_ELEMENTS };
 float TRIGGER_COLOR[] = { 0.8f * GLOBAL_BRIGHTNESS_ELEMENTS, 0 * GLOBAL_BRIGHTNESS_ELEMENTS, 0.8f * GLOBAL_BRIGHTNESS_ELEMENTS };
 
 void updateColors() {
@@ -89,7 +88,7 @@ void drawTexturedRect(float x, float y, float w, float h, GLuint texture) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
-	glColor4f(0, 0, 0, GLOBAL_ALPHA);
+	glColor4f(1, 1, 1, GLOBAL_ALPHA);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0, 0);
 	glVertex2f(x, y);
@@ -243,16 +242,28 @@ void drawLeftStick(GLFWgamepadstate& state) {
 	float currentColor[4];
 	glGetFloatv(GL_CURRENT_COLOR, currentColor);
 	glColor4f(STICK_COLOR[0], STICK_COLOR[1], STICK_COLOR[2], GLOBAL_ALPHA_ELEMENTS);
-	drawCircle(LEFT_STICK_X + state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] * STICK_RADIUS,
-		LEFT_STICK_Y + state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] * STICK_RADIUS, STICK_POINT_RADIUS, 36);
+	float xCircle = state.axes[GLFW_GAMEPAD_AXIS_LEFT_X]
+		* sqrt(1 - 0.5 * state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] * state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y]);
+	float yCircle = state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y]
+		* sqrt(1 - 0.5 * state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] * state.axes[GLFW_GAMEPAD_AXIS_LEFT_X]);
+	drawCircle(LEFT_STICK_X + xCircle * STICK_RADIUS,
+		LEFT_STICK_Y + yCircle * STICK_RADIUS, STICK_POINT_RADIUS, 36);
+	/*drawCircle(LEFT_STICK_X + state.axes[GLFW_GAMEPAD_AXIS_LEFT_X] * STICK_RADIUS,
+		LEFT_STICK_Y + state.axes[GLFW_GAMEPAD_AXIS_LEFT_Y] * STICK_RADIUS, STICK_POINT_RADIUS, 36);*/
 	glColor4f(currentColor[0], currentColor[1], currentColor[2], currentColor[3]);
 }
 void drawRightStick(GLFWgamepadstate& state) {
 	float currentColor[4];
 	glGetFloatv(GL_CURRENT_COLOR, currentColor);
 	glColor4f(STICK_COLOR[0], STICK_COLOR[1], STICK_COLOR[2], GLOBAL_ALPHA_ELEMENTS);
-	drawCircle(RIGHT_STICK_X + state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X] * STICK_RADIUS,
-		RIGHT_STICK_Y + state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y] * STICK_RADIUS, STICK_POINT_RADIUS, 36);
+	float xCircle = state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X]
+		* sqrt(1 - 0.5 * state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y] * state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y]);
+	float yCircle = state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y]
+		* sqrt(1 - 0.5 * state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X] * state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X]);
+	drawCircle(RIGHT_STICK_X + xCircle * STICK_RADIUS,
+		RIGHT_STICK_Y + yCircle * STICK_RADIUS, STICK_POINT_RADIUS, 36);
+	/*drawCircle(RIGHT_STICK_X + state.axes[GLFW_GAMEPAD_AXIS_RIGHT_X] * STICK_RADIUS,
+		RIGHT_STICK_Y + state.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y] * STICK_RADIUS, STICK_POINT_RADIUS, 36);*/
 	glColor4f(currentColor[0], currentColor[1], currentColor[2], currentColor[3]);
 }
 void drawLeftThumb() {

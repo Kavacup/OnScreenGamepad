@@ -1,8 +1,6 @@
 #pragma once
-#ifdef XBOX_PROFILE
-
-#endif
-#ifdef PS_PROFILE
+#ifndef PS_PROFILE
+#define PS_PROFILE
 
 #define CONTROLLER_WIDTH 1014
 #define CONTROLLER_HEIGHT 650

@@ -4,8 +4,6 @@
 #include <windows.h>
 #include <GLFW/glfw3.h>
 #include <SOIL2.h>
-
-#define PS_PROFILE
 #include "Positioning constants.h"
 #include "Drawing.h"
 
@@ -13,30 +11,22 @@ void glfwSetWindowCenter(GLFWwindow* window) {
 	// Get window position and size
 	int window_x, window_y;
 	glfwGetWindowPos(window, &window_x, &window_y);
-
 	int window_width, window_height;
 	glfwGetWindowSize(window, &window_width, &window_height);
-
-	// Halve the window size and use it to adjust the window position to the center of the window
-	window_width *= 0.5;
-	window_height *= 0.5;
-
+	// Center only to width
+	window_width /= 2;
 	window_x += window_width;
 	window_y += window_height;
-
 	// Get the list of monitors
 	int monitors_length;
 	GLFWmonitor** monitors = glfwGetMonitors(&monitors_length);
-
 	if (monitors == NULL) {
 		// Got no monitors back
 		return;
 	}
-
 	// Figure out which monitor the window is in
 	GLFWmonitor* owner = NULL;
 	int owner_x, owner_y, owner_width, owner_height;
-
 	for (int i = 0; i < monitors_length; i++) {
 		// Get the monitor position
 		int monitor_x, monitor_y;
@@ -67,10 +57,9 @@ void glfwSetWindowCenter(GLFWwindow* window) {
 			owner_height = monitor_height;
 		}
 	}
-
 	if (owner != NULL) {
 		// Set the window position to the center of the owner monitor
-		glfwSetWindowPos(window, owner_x + (owner_width * 0.5) - window_width, owner_y + (owner_height * 0.5) - window_height);
+		glfwSetWindowPos(window, owner_x + (owner_width * 0.5) - window_width, owner_y + (owner_height) - window_height);
 	}
 }
 
@@ -161,16 +150,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 }
 
 void showSettingsWindow(GLFWwindow* window) {
-	ImGui::Begin("Settings", &showSettings, ImGuiWindowFlags_MenuBar);
-	if (ImGui::BeginMenuBar())
-	{
-		if (ImGui::BeginMenu("File"))
-		{
-			if (ImGui::MenuItem("Close", "RMB")) { showSettings = false; }
-			ImGui::EndMenu();
-		}
-		ImGui::EndMenuBar();
-	}
+	ImGui::Begin("Settings", &showSettings, ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::PushItemWidth(0.5f * ImGui::GetWindowWidth());
 	ImGui::SliderFloat("Size", &SIZE_KOEF, 0.3f, 1.0f);
 	if (ImGui::Button("Apply size")) {
@@ -180,6 +160,12 @@ void showSettingsWindow(GLFWwindow* window) {
 	ImGui::SliderFloat("Controller opacity", &GLOBAL_ALPHA, 0.4f, 0.9f);
 	if(ImGui::SliderFloat("Elements opacity", &GLOBAL_BRIGHTNESS_ELEMENTS, 0.4f, 0.9f))
 		updateColors();
+	//colors
+	ImGui::ColorEdit3("Buttons press color", BUTTON_COLOR);
+	ImGui::ColorEdit3("Stick color", STICK_COLOR);
+	ImGui::ColorEdit3("Stick press color", THUMB_COLOR);
+	ImGui::ColorEdit3("Trigger pulling color", TRIGGER_COLOR);
+
 	ImGui::PopItemWidth();
 	if (ImGui::Button("Exit app")) glfwSetWindowShouldClose(window, GL_TRUE);
 	ImGui::End();
@@ -207,12 +193,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLin
 
 	GLuint texture = SOIL_load_OGL_texture // gamepad texture
 	(
-		"../pics/ps_gamepad_photoshoped2.png",
+		"ps_gamepad.png",
 		SOIL_LOAD_AUTO,
 		SOIL_CREATE_NEW_ID,
 		SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
 
 	);
+	
 	// init framebuf
 	glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
 	glfwSetCursorPosCallback(window, cursor_position_callback);
@@ -220,7 +207,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLin
 	glViewport(0, 0, windowWidth, windowHeight);
 	glfwSwapInterval(1);
 
-	glClearColor(0, 0, 0, GLOBAL_ALPHA * 0.1); // transparent window
+	glClearColor(0, 0, 0, GLOBAL_ALPHA * 0.1f); // transparent window
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -236,7 +223,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLin
 	const char* name = glfwGetGamepadName(GLFW_JOYSTICK_1);
 	printf("%s", name); // XInput Gamepad (GLFW)
 #endif
-	 
 	//main window loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
