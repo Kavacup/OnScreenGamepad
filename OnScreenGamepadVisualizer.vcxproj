@@ -22,7 +22,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{acf1e083-5ec9-43c8-b68a-cea55eb0cba0}</ProjectGuid>
-    <RootNamespace>Project1</RootNamespace>
+    <RootNamespace>OnScreenGamepadVisualizer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>OnScreenGamepadVisualizer</ProjectName>
   </PropertyGroup>
